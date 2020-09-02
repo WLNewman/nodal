@@ -11,7 +11,9 @@
 			padding-top: 6px;
 			width: 30px;
 			height: 30px;
-			margin-bottom: 8px;			
+			margin-bottom: 8px;
+			/*float: right;*/
+			
 		}
 
 		.options {
@@ -21,39 +23,84 @@
 			float: top;
 		}
 
+		.menu {
+			background-color: rgb(25,25,25);
+			border-radius: 3px;
+			padding: 5px;
+			width: 120px;
+			height: 120px;
+			font-family: Trebuchet MS;
+			float: right;
+			float: top;
+			margin-right: 15px;
+			margin-top: -72px;
+			display: none;
+		}
+
+		.body {
+			padding: 0;
+			margin: 0;
+		}
+
+		.node {
+			font-size: 40px;
+			color: white;
+			height: 20px;
+		}
+
+		.canvas {
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: -1;
+		}
+
 	</style>
-	
+
+
+
 	<head>
 		<meta charset="UTF-8">
-		<meta name="description" content="Graph Theory">
+		<meta name="description" content="Graph Theory Visualized">
+		<meta name="keywords" content="Graph Theory, Dijkstra, pathfinder, nodes, Page Rank">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" href="NodalPictures/Icon.png">
 		<title>NoDAL</title>
 	</head>
 		<header>
 			<a href="https://amazon.com">
-			<img src="nodalLogo.png" width="125" alt ="nodal Logo"/>
+			<img src="NodalPictures/nodalLogo.png" width="125" alt ="nodal Logo"/>
 			</a>
 
 			<div class="options">
-				<div class="button">
-					<img src="Plus.png" onclick="run()" height="25px"/>
+				<div class="button" onclick="menu('plusMenu')">
+					<img src="NodalPictures/Plus.png" alt="plus" height="25px"/>
 				</div>
 
-				<div class="button" onclick="run()">
-					<img src="A.png" height="30px"/>
+				<div class="button" onclick="menu('algorithmMenu')">
+					<img src="NodalPictures/A.png" alt="'A'"height="30px"/>
 				</div>
 				
 				<div class="button" onclick="erase()" onmouseover="Erase">
-					<img src="Erase.png" width="30px"/>
+					<img src="NodalPictures/Erase.png" alt="eraser" width="30px"/>
 				</div>
 			</div>
+
+
 		</header>
 	</head>
 
-	<body id="main"style="background-color: black">
-		
-		<h1 id="j" style="color: white" onclick="speak()">some graph</h1>
 
-		<!-- <img src="nodalLogo.png" onclick="run()"> -->
+
+
+	<body id="main" onload="draw()" style="background-color: black">
+
+		<div id="plusMenu" class="menu" style="color: white"><i>Insert:</i></div>
+		<div id="algorithmMenu" class="menu" style="color: white"><i>Algorithms:</i></div>
+
+
+
+		<canvas id='nodes' class='canvas' width="body.width" height="body.height"></canvas>
 
 		<script type="text/javascript" src="nodal.js">
 			
