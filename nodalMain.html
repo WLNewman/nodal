@@ -81,7 +81,7 @@
 					<img src="NodalPictures/A.png" alt="'A'"height="30px"/>
 				</div>
 				
-				<div class="button" onclick="erase()" onmouseover="Erase">
+				<div class="button" onclick="erase()">
 					<img src="NodalPictures/Erase.png" alt="eraser" width="30px"/>
 				</div>
 			</div>
@@ -93,13 +93,13 @@
 
 
 
-	<body id="main" onload="draw(500,500)" onclick="draw(event.clientX, event.clientY)" style="background-color: black">
+	<body id="main" onload="draw(), first = new Node((0.5 * window.innerWidth), (0.5 * window.innerHeight), 'orange', [])" style="background-color: black">
 
 		<div id="plusMenu" class="menu" style="color: white"><i>Insert:</i></div>
 		<div id="algorithmMenu" class="menu" style="color: white"><i>Algorithms:</i> <input type="range" width="50%"/></div>
 
 
-		<canvas id='graph' class='canvas' width="body.width" height="body.height"></canvas>
+		<canvas id='graph' class='canvas' width="body.width" height="body.height" onclick="n = new Node(event.clientX, event.clientY, 'white', [first]), first.addSister(n), first.drawArrow()"></canvas>
 
 		<script type="text/javascript" src="nodal.js">
 			
