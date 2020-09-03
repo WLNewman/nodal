@@ -3,8 +3,13 @@ function run() {
 }
 
 function erase() {
-	alert("Are you sure you want to erase?")
+	for (var i=1; i < nodeList.length; i++) {
+		nodeList.splice[i];
+	}
 }
+
+
+nodeList = []
 
 class Node {
 	constructor(x, y, color, sisters) {
@@ -12,34 +17,65 @@ class Node {
 		this.y = y;
 		this.color = color;
 		this.sisters = sisters;
+		nodeList.push(this);
+
+// following draws when created
+		this.canvas = document.getElementById("graph");
+		this.con = this.canvas.getContext('2d');
+		this.con.beginPath();
+
+   		this.con.arc(this.x, this.y, 5, 0, Math.PI * 2, true);
+		this.con.fillStyle = this.color;
+		this.con.fill();
+		this.con.closePath();
 	}
 
-	draw() {
-		let canvas = document.getElementById('graph');
-		// canvas.style.border = '1px solid white';
-		if(canvas.getContext) {
-			let con = canvas.getContext('2d');
+	x() {
+		return this._x;
+	}
+	y() {
+		return this._y;
+	}
 
-			con.canvas.width = window.innerWidth;
-			con.canvas.height = window.innerHeight;
+	addSister(node) {
+		this.sisters.push(node)
+	}
 
-			con.beginPath();
-			con.arc(this.x, this.y, 5, 0, Math.PI * 2, true);
-			// con.lineWidth = 10;
-			con.fillStyle = this.color;
-			con.fill();
+	drawArrow() {
+		for (var s=0; s < this.sisters.length; s++) {
+			this.con = this.canvas.getContext('2d');
+			this.con.beginPath();
+
+			let endX = this.sisters[s].x;
+			let endY = this.sisters[s].y 
+
+			this.con.moveTo(this.x, this.y);
+			this.con.lineTo(endX, endY);
+
+			let r = 10;
+
+			let dx = endX - this.x;
+			let dy = endY - this.y;
+			let angle = Math.atan2(dy,dx);			
+
+			angle += (1.2/3.0) * (2 * Math.PI)
+			let x = r *Math.cos(angle) + endX;
+			let y = r *Math.sin(angle) + endY;
+
+			this.con.moveTo(x, y);
+			this.con.lineTo(endX,endY);
+			this.con.strokeStyle = 'white';
+			this.con.stroke();
+			this.con.closePath();
 		}
 	}
 }
 
-function speak(){
-	let elem = document.getElementById("j");
-	if (elem.style.color = "white"){
-		elem.style.color = "orange";
+
+function drawNodes() {
+	for (n in nodeList) {
+		nodeList[n].draw();
 	}
-	else if (elem.style.color = "orange"){
-		elem.style.color = "white";
-	}	
 }
 
 function menu(menu) {
@@ -52,7 +88,13 @@ function menu(menu) {
 	}
 }
 
-function draw(x, y) {
+function disp() {
+	for (n in nodeList) {
+		console.log(nodeList[n]);
+	}
+}
+
+function draw() {
 	let canvas = document.getElementById('graph');
 	// canvas.style.border = '1px solid white';
 	if(canvas.getContext) {
@@ -61,10 +103,6 @@ function draw(x, y) {
 		con.canvas.width = window.innerWidth;
 		con.canvas.height = window.innerHeight;
 
-		con.beginPath();
-		con.arc(x, y, 5, 0, Math.PI * 2, true);
-		// con.lineWidth = 10;
-		con.fillStyle = "white";
-		con.fill();
+		console.log('success');
 	}
 }
