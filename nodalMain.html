@@ -93,14 +93,13 @@
 
 
 
-	<body id="main" onload="draw()" style="background-color: black">
+	<body id="main" onload="draw(500,500)" onclick="draw(event.clientX, event.clientY)" style="background-color: black">
 
 		<div id="plusMenu" class="menu" style="color: white"><i>Insert:</i></div>
-		<div id="algorithmMenu" class="menu" style="color: white"><i>Algorithms:</i></div>
+		<div id="algorithmMenu" class="menu" style="color: white"><i>Algorithms:</i> <input type="range" width="50%"/></div>
 
 
-
-		<canvas id='nodes' class='canvas' width="body.width" height="body.height"></canvas>
+		<canvas id='graph' class='canvas' width="body.width" height="body.height"></canvas>
 
 		<script type="text/javascript" src="nodal.js">
 			
