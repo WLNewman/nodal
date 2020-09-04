@@ -3,14 +3,21 @@ const con = graph.getContext('2d');
 
 
 graph.addEventListener('DOMContentLoaded', init());
-graph.addEventListener('click', createNode);
-graph.addEventListener('click', drawEdges);
+graph.addEventListener('mouseup', createNode);
+graph.addEventListener('mouseup', drawEdges);
+document.addEventListener('keydown', link);
 document.addEventListener('mousemove', changeNode);
 graph.addEventListener('click', disp);
+
 
 let nodeList = [];
 let first = 0;
 let n = 0;
+let num = 1;
+let stop = false;
+let mouseX = 0;
+let mouseY = 0;
+
 
 class Node {
 	constructor(x, y, color, sisters) {
@@ -32,11 +39,27 @@ class Node {
 	}
 
 	addSister(node) {
-		this.sisters.push(node)
+		this.sisters.push(node);
+	}
+
+	notSister(n) {
+		// used to verify no parallel edges don't know why I needed to declare s
+		let s = 0;
+		for (s in this.sisters) {
+			if (this.sisters[s] == n) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	changeColor(c) {
 		this.color = c;
+	}
+
+	changeXY(x, y) {
+		this.x = x;
+		this.y = y;
 	}
 
 	drawArrow() {
@@ -44,7 +67,7 @@ class Node {
 			con.beginPath();
 
 			let endX = this.sisters[s].x;
-			let endY = this.sisters[s].y 
+			let endY = this.sisters[s].y; 
 
 			con.moveTo(this.x, this.y);
 			con.lineTo(endX, endY);
@@ -111,10 +134,9 @@ function createNode() {
 	else {
 		for (n in nodeList)
 			// hitbox
-			dx = (event.clientX - nodeList[n].x);
-			dy = (event.clientY - nodeList[n].y);
-			diff = Math.sqrt((dx * dx) + (dy * dy));
+			diff = pythagoras(event.clientX, event.clientY, nodeList[n].x, nodeList[n].y);
 			// making sure they don't overlap
+			console.log(diff);
 			if (diff > 15){
 				n = new Node(event.clientX, event.clientY, 'white', [first]);
 				first.addSister(n);
@@ -127,22 +149,45 @@ function createNode() {
 	}
 
 function changeNode() {
-	let x = event.clientX;
-	let y = event.clientY;
+	mouseX = event.clientX;
+	mouseY = event.clientY;
 
 	for (n in nodeList) {
 		// hitbox
-		let dx = (x - nodeList[n].x);
-		let dy = (y - nodeList[n].y);
-		let diff = Math.sqrt((dx * dx) + (dy * dy));
-
-		if (diff <= 10){
+		diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+		if (diff <= 5){
 			first.changeColor('white');
 			first = nodeList[n];
 			first.changeColor('orange');
 			updateDraw();
 		}
 	}
+}
+
+function link() {
+	// link two unjoined edges
+	for (n in nodeList){
+		if (nodeList[n] !== first){
+			// prevent looping
+			diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+			console.log(diff);
+			if (diff < 25) {
+				// prevent parallel edges
+				if (first.notSister(nodeList[n])){
+					first.addSister(nodeList[n]);
+					nodeList[n].addSister(first);
+					updateDraw();
+				}
+			}
+		}
+	}
+}
+
+function pythagoras(x1, y1, x2, y2) {
+	let dx = (x1 - x2);
+	let dy = (y1 - y2);
+	let diff = Math.sqrt((dx ** 2) + (dy ** 2));
+	return diff;
 }
 
 function updateDraw() {
@@ -161,6 +206,8 @@ function drawEdges() {
 	}
 }
 
+
+
 function menu(menu) {
 	// display a hidden menu's contents
 	let i = document.getElementById(menu);
@@ -177,3 +224,4 @@ function disp() {
 			console.log(nodeList[n]);		
 	}
 }
+
