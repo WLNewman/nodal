@@ -1,15 +1,16 @@
-function run() {
-	document.body.style.backgroundColor = "white";
-}
-
-function erase() {
-	for (var i=1; i < nodeList.length; i++) {
-		nodeList.splice[i];
-	}
-}
+const graph = document.getElementById('graph');
+const con = graph.getContext('2d');
 
 
-nodeList = []
+graph.addEventListener('DOMContentLoaded', init());
+graph.addEventListener('click', createNode);
+graph.addEventListener('click', drawEdges);
+document.addEventListener('mousemove', changeNode);
+graph.addEventListener('click', disp);
+
+let nodeList = [];
+let first = 0;
+let n = 0;
 
 class Node {
 	constructor(x, y, color, sisters) {
@@ -20,39 +21,35 @@ class Node {
 		nodeList.push(this);
 
 // following draws when created
-		this.canvas = document.getElementById("graph");
-		this.con = this.canvas.getContext('2d');
-		this.con.beginPath();
-
-   		this.con.arc(this.x, this.y, 5, 0, Math.PI * 2, true);
-		this.con.fillStyle = this.color;
-		this.con.fill();
-		this.con.closePath();
 	}
 
-	x() {
-		return this._x;
-	}
-	y() {
-		return this._y;
+	draw() {
+		con.beginPath();
+   		con.arc(this.x, this.y, 5, 0, Math.PI * 2, true);
+		con.fillStyle = this.color;
+		con.fill();
+		con.closePath();
 	}
 
 	addSister(node) {
 		this.sisters.push(node)
 	}
 
+	changeColor(c) {
+		this.color = c;
+	}
+
 	drawArrow() {
 		for (var s=0; s < this.sisters.length; s++) {
-			this.con = this.canvas.getContext('2d');
-			this.con.beginPath();
+			con.beginPath();
 
 			let endX = this.sisters[s].x;
 			let endY = this.sisters[s].y 
 
-			this.con.moveTo(this.x, this.y);
-			this.con.lineTo(endX, endY);
+			con.moveTo(this.x, this.y);
+			con.lineTo(endX, endY);
 
-			let r = 10;
+			let r = 7;
 
 			let dx = endX - this.x;
 			let dy = endY - this.y;
@@ -62,23 +59,110 @@ class Node {
 			let x = r *Math.cos(angle) + endX;
 			let y = r *Math.sin(angle) + endY;
 
-			this.con.moveTo(x, y);
-			this.con.lineTo(endX,endY);
-			this.con.strokeStyle = 'white';
-			this.con.stroke();
-			this.con.closePath();
+			con.moveTo(x, y);
+			con.lineTo(endX,endY);
+
+			con.strokeStyle = 'Aquamarine';
+			con.stroke();
+
+			angle += (-1.8) * (2 * Math.PI)
+			x = r *Math.cos(angle) + endX;
+			y = r *Math.sin(angle) + endY;
+
+			con.lineTo(x,y);
+			con.fillStyle = 'dimGray';
+			con.fill();
+			
+			con.closePath();
 		}
 	}
 }
 
 
-function drawNodes() {
+function erase() {
+	// the erase button
+	nodeList = [];
+	first = 0;
+	con.fillStyle = 'black';
+	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
+	console.log("clear");
+}
+
+function init() {
+	// set up the canvas for drawing
+	let canvas = document.getElementById('graph');
+	if(graph.getContext) {
+		let con = graph.getContext('2d');
+
+		con.canvas.width = window.innerWidth;
+		con.canvas.height = window.innerHeight;
+
+		console.log('success');
+	}
+}
+
+
+function createNode() {
+	if (first == 0) {
+		first = new Node((0.5 * window.innerWidth), (0.5 * window.innerHeight), 'orange', []);
+		let p = document.getElementById('prompt');
+		p.style.display = 'none';
+	}
+	else {
+		for (n in nodeList)
+			// hitbox
+			dx = (event.clientX - nodeList[n].x);
+			dy = (event.clientY - nodeList[n].y);
+			diff = Math.sqrt((dx * dx) + (dy * dy));
+			// making sure they don't overlap
+			if (diff > 15){
+				n = new Node(event.clientX, event.clientY, 'white', [first]);
+				first.addSister(n);
+			}
+			else {
+				console.log("verbooten!");
+			}
+		}
+	updateDraw();
+	}
+
+function changeNode() {
+	let x = event.clientX;
+	let y = event.clientY;
+
 	for (n in nodeList) {
-		nodeList[n].draw();
+		// hitbox
+		let dx = (x - nodeList[n].x);
+		let dy = (y - nodeList[n].y);
+		let diff = Math.sqrt((dx * dx) + (dy * dy));
+
+		if (diff <= 10){
+			first.changeColor('white');
+			first = nodeList[n];
+			first.changeColor('orange');
+			updateDraw();
+		}
+	}
+}
+
+function updateDraw() {
+	// when graph changes call this to update
+	con.fillStyle = 'black';
+	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
+	for (n in nodeList) {
+		nodeList[n].draw()
+	}
+	drawEdges();
+}
+
+function drawEdges() {
+	for (n in nodeList) {
+		nodeList[n].drawArrow();
 	}
 }
 
 function menu(menu) {
+	// display a hidden menu's contents
 	let i = document.getElementById(menu);
 	if(i.style.display === "block"){
 		i.style.display = "none";
@@ -90,19 +174,6 @@ function menu(menu) {
 
 function disp() {
 	for (n in nodeList) {
-		console.log(nodeList[n]);
-	}
-}
-
-function draw() {
-	let canvas = document.getElementById('graph');
-	// canvas.style.border = '1px solid white';
-	if(canvas.getContext) {
-		let con = canvas.getContext('2d');
-
-		con.canvas.width = window.innerWidth;
-		con.canvas.height = window.innerHeight;
-
-		console.log('success');
+			console.log(nodeList[n]);		
 	}
 }
