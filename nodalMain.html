@@ -12,8 +12,7 @@
 			width: 30px;
 			height: 30px;
 			margin-bottom: 8px;
-			/*float: right;*/
-			
+			z-index: 2;
 		}
 
 		.options {
@@ -27,7 +26,7 @@
 			background-color: rgb(25,25,25);
 			border-radius: 3px;
 			padding: 5px;
-			width: 120px;
+			width: 125px;
 			height: 120px;
 			font-family: Trebuchet MS;
 			float: right;
@@ -35,6 +34,35 @@
 			margin-right: 15px;
 			margin-top: -72px;
 			display: none;
+			animation: fade;
+			animation-duration: .3s;
+		}
+
+		@keyframes fade {
+			from{opacity: 30%;}
+			to{opacity: 100%;}
+		}
+		@keyframes totalFade {
+			from{opacity: 0%;}
+			to{opacity: 70%;}
+		}
+
+
+		.prompt {
+			position: fixed;
+			top: 45%;
+			left: 48%;
+			float: center;
+			background-color: rgb(25,25,25);
+			border-radius: 3px;
+			padding-left: 3px;
+			width: 45px;
+			height: 50px;
+			animation: fade;
+			animation-duration: 1.25s;
+			animation-direction: alternate-reverse;
+			animation-iteration-count: infinite;
+			display: block;
 		}
 
 		.body {
@@ -42,16 +70,12 @@
 			margin: 0;
 		}
 
-		.node {
-			font-size: 40px;
-			color: white;
-			height: 20px;
-		}
-
 		.canvas {
 			position: absolute;
 			top: 0;
 			left: 0;
+			width: body.width;
+			height: body.height;
 			z-index: -1;
 		}
 
@@ -71,7 +95,7 @@
 			<a href="https://amazon.com">
 			<img src="NodalPictures/nodalLogo.png" width="125" alt ="nodal Logo"/>
 			</a>
-
+			
 			<div class="options">
 				<div class="button" onclick="menu('plusMenu')">
 					<img src="NodalPictures/Plus.png" alt="plus" height="25px"/>
@@ -86,24 +110,32 @@
 				</div>
 			</div>
 
+			<div class="prompt" id='prompt' value="click to add nodes">
+				<img src="NodalPictures/Pointer.png">
+			</div>
 
 		</header>
 	</head>
 
 
+	<body id="main" style="background-color: black">
+
+		<div id="plusMenu" class="menu" style="color: white">
+			<i>Insert:</i>
+			<br/>
+			<i>C<sub>n</sub></i><input type='radio' name='btn'/>
+			<i>K<sub>n</sub></i><input type='radio' name='btn'/>
+			<i>T<sub>n</sub></i><input type='radio' name='btn'/>
+
+		</div>
+		<div id="algorithmMenu" class="menu" style="color: white">
+			<i>Algorithms:</i> 
+		</div>
 
 
-	<body id="main" onload="draw(), first = new Node((0.5 * window.innerWidth), (0.5 * window.innerHeight), 'orange', [])" style="background-color: black">
+		<canvas id='graph' class='canvas' value="your browser does not support this"></canvas>
 
-		<div id="plusMenu" class="menu" style="color: white"><i>Insert:</i></div>
-		<div id="algorithmMenu" class="menu" style="color: white"><i>Algorithms:</i> <input type="range" width="50%"/></div>
-
-
-		<canvas id='graph' class='canvas' width="body.width" height="body.height" onclick="n = new Node(event.clientX, event.clientY, 'white', [first]), first.addSister(n), first.drawArrow()"></canvas>
-
-		<script type="text/javascript" src="nodal.js">
-			
-		</script>
+		<script type="text/javascript" src="nodal.js"></script>
 
 	</body>
 </html>
