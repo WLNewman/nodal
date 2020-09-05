@@ -26,14 +26,15 @@ class Node {
 		this.y = y;
 		this.color = color;
 		this.sisters = sisters;
+		this.distance = 99999999999;
+		this.previous = [];
 		// weight is edge weight same index as sisters
 		this.weight = []
 		this.weight.push(1);
 		nodeList.push(this);
-
-// following draws when created
 	}
 
+	// following draws when created
 	draw() {
 		con.beginPath();
    		con.arc(this.x, this.y, 5, 0, Math.PI * 2, true);
@@ -71,6 +72,43 @@ class Node {
 		return true;
 	}
 
+	showSisters() {
+		let sortedSisters = []
+		let sis = 0;
+		console.log('fu');
+
+		for (sis in this.sisters){
+			console.log('fuu');
+
+			sortedSisters.push(this.sisters[sis]);
+		}
+		//bubble sort bad, I know but there's only a few elements per list
+		let sorting = true;
+		while (sorting == true && sortedSisters.length > 1) {
+			sorting = false
+			console.log('fuuu');
+			for (s in (sortedSisters.length - 1)){
+				if (sortedSisters[s].weight[s] > sortedSisters[s + 1].weight[s]){
+					sorting = false;
+					let index1 = sortedSisters[s];
+					let index2 = sortedSisters[s+1];
+					sortedSisters[s] = index2;
+					sortedSisters[s + 1] = index1;
+				}
+			}
+		}
+		return sortedSisters;
+	}
+
+
+	changeDistance(n) {
+		this.distance = n;
+	}
+
+	changePrevious(n) {
+		this.previous = n;
+	}
+
 	changeColor(c) {
 		this.color = c;
 	}
@@ -81,10 +119,13 @@ class Node {
 	}
 
 	changeWeight(s, num) {
-		console.log('check');
 		let ind = this.sisters.indexOf(s);
-		console.log(ind);
 		this.weight[ind] += num;
+	}
+
+	findWeight(s) {
+		let x = this.sisters.indexOf(s);
+		return this.weight[x];
 	}
 
 	drawArrow() {
@@ -268,6 +309,22 @@ function keyPress() {
 				}
 			}
 			break;	
+
+
+		case "Enter":
+			let copy = [];
+			for (n in nodeList) {
+				copy.push(nodeList[n]);
+			}
+			for (n in nodeList){
+				diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+				
+				//activate dijkstra
+				if (nodeList[n] !== first && diff < 25) {
+					dijkstra(copy, first, nodeList[n]);
+				}
+			}
+			break;	
 		}
 		updateDraw();
 	}
@@ -317,3 +374,59 @@ function disp() {
 	}
 }
 
+function dijkstra(list, source, target) {
+	con.fillStyle = 'black';
+	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+	source.changeDistance(0);
+	console.log("SOURCE");
+	console.log(source);
+	console.log(list);
+
+	let visited = [];
+
+	var len = list.length;
+
+	while (list.length > 0) {
+		let min = 100000000000;
+		let activeNode = 'f';
+		// console.log("LENGTH");
+		// console.log(list.length);
+
+
+		for (n in list) {
+			if (list[n].distance < min) {
+				min = list[n].distance;
+				activeNode = list[n];
+			}
+		}
+		// console.log('ACTIVE')
+		// console.log(activeNode);
+		visited.push(activeNode);
+		list.splice(list.indexOf(activeNode), 1);
+
+		// sis = activeNode.showSisters();
+		let sis = activeNode.sisters;
+		// console.log('sis');
+		// console.log(sis);
+		// console.log(activeNode.sisters);
+		for (s in sis) {
+			// BELOW SHOULD BE WEIGHT NOT .distance
+			// ALSO DON'T FORGET TO SORT SIS LATER
+			let altPath = activeNode.distance + activeNode.findWeight(sis[s]);
+			if (altPath <= sis[s].distance){
+				sis[s].changeDistance(altPath);
+				sis[s].changePrevious(activeNode);
+			}
+		}
+		// console.log('LOOP');
+	}
+	console.log('target distance:');
+
+	console.log(target.distance);
+
+	for (n in visited) {
+		visited[n].changeDistance(99999999999);
+		visited[n].changePrevious([]);
+	}
+}
