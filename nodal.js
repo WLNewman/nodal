@@ -1,11 +1,12 @@
 const graph = document.getElementById('graph');
 const con = graph.getContext('2d');
+const font = con.font = " 12px Trebuchet MS";
 
 
 graph.addEventListener('DOMContentLoaded', init());
 graph.addEventListener('mouseup', createNode);
 graph.addEventListener('mouseup', drawEdges);
-document.addEventListener('keydown', link);
+document.addEventListener('keydown', keyPress);
 document.addEventListener('mousemove', changeNode);
 graph.addEventListener('click', disp);
 
@@ -25,6 +26,9 @@ class Node {
 		this.y = y;
 		this.color = color;
 		this.sisters = sisters;
+		// weight is edge weight same index as sisters
+		this.weight = []
+		this.weight.push(1);
 		nodeList.push(this);
 
 // following draws when created
@@ -40,6 +44,20 @@ class Node {
 
 	addSister(node) {
 		this.sisters.push(node);
+		this.weight.push(1);
+	}
+
+	deleteSelf() {
+		// delete reference to self as sister
+		let s = 0;
+		for (s in this.sisters) {
+			this.sisters[s].removeSister(this);
+		}
+	}
+	removeSister(n) {
+		let x = this.sisters.indexOf(n);
+		this.sisters.splice(x, 1);
+		this.weight.splice(x, 1);
 	}
 
 	notSister(n) {
@@ -60,6 +78,13 @@ class Node {
 	changeXY(x, y) {
 		this.x = x;
 		this.y = y;
+	}
+
+	changeWeight(s, num) {
+		console.log('check');
+		let ind = this.sisters.indexOf(s);
+		console.log(ind);
+		this.weight[ind] += num;
 	}
 
 	drawArrow() {
@@ -97,6 +122,13 @@ class Node {
 			con.fill();
 			
 			con.closePath();
+
+			// draw weight
+
+			con.fillStyle = 'pink';
+			let midX = (20 + endX + this.x) / 2;
+			let midY = (20 + endY + this.y) / 2;
+			con.fillText(this.weight[s], midX, midY);
 		}
 	}
 }
@@ -155,7 +187,7 @@ function changeNode() {
 	for (n in nodeList) {
 		// hitbox
 		diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
-		if (diff <= 5){
+		if (diff <= 12){
 			first.changeColor('white');
 			first = nodeList[n];
 			first.changeColor('orange');
@@ -164,24 +196,84 @@ function changeNode() {
 	}
 }
 
-function link() {
-	// link two unjoined edges
-	for (n in nodeList){
-		if (nodeList[n] !== first){
-			// prevent looping
-			diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
-			console.log(diff);
-			if (diff < 25) {
-				// prevent parallel edges
-				if (first.notSister(nodeList[n])){
-					first.addSister(nodeList[n]);
-					nodeList[n].addSister(first);
-					updateDraw();
+function keyPress() {
+	switch (event.key) {
+		case " ":
+			// link two unjoined edges
+			for (n in nodeList){
+				if (nodeList[n] !== first){
+					// prevent looping
+					diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+					console.log(diff);
+					if (diff < 25) {
+						// prevent parallel edges
+						if (first.notSister(nodeList[n])){
+							first.addSister(nodeList[n]);
+							nodeList[n].addSister(first);
+						}
+					}
+				}
+			}	
+			break;
+		case "Shift":
+			//drag n drop
+			first.changeXY(mouseX, mouseY);
+			break;
+
+		case "Control":
+		// remove edges/nodes
+			if (nodeList.length > 1) { //prevents glitch on empty list
+				for (n in nodeList){
+					diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+
+					//delete first
+					if (nodeList[n] === first && diff < 10) {
+						nodeList[n].deleteSelf();
+						nodeList.splice(n, 1);
+						first = nodeList[0];
+						first.changeColor('orange');
+					}
+					//delete edge between first and other
+					 else if (nodeList[n] !== first && diff < 25) {
+						first.removeSister(nodeList[n]);
+						nodeList[n].removeSister(first);
+					}
+				}	
+			}
+			break;
+
+		//decrease weight
+		case 'Left':
+		case 'ArrowLeft':
+			for (n in nodeList){
+				diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+				
+				//delete edge between first and other
+				if (nodeList[n] !== first && diff < 25) {
+					first.changeWeight(nodeList[n], -1);
+					nodeList[n].changeWeight(first, -1);
 				}
 			}
+			break;	
+		//increase weight
+		case 'Right':
+		case 'ArrowRight':
+			for (n in nodeList){
+				diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+				
+				//delete edge between first and other
+				if (nodeList[n] !== first && diff < 25) {
+					first.changeWeight(nodeList[n], 1);
+					nodeList[n].changeWeight(first, 1);
+				}
+			}
+			break;	
 		}
+		updateDraw();
 	}
-}
+
+
+
 
 function pythagoras(x1, y1, x2, y2) {
 	let dx = (x1 - x2);
