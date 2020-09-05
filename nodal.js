@@ -4,20 +4,23 @@ const font = con.font = " 12px Trebuchet MS";
 
 
 graph.addEventListener('DOMContentLoaded', init());
-graph.addEventListener('mouseup', createNode);
+graph.addEventListener('mousedown', mouseDiff);
 graph.addEventListener('mouseup', drawEdges);
 document.addEventListener('keydown', keyPress);
 document.addEventListener('mousemove', changeNode);
 graph.addEventListener('click', disp);
+// document.getElementById('add').addEventListener('click', kFive());
 
 
 let nodeList = [];
+let pathWay = [];
 let first = 0;
 let n = 0;
 let num = 1;
 let stop = false;
 let mouseX = 0;
 let mouseY = 0;
+let path = false;
 
 
 class Node {
@@ -100,6 +103,34 @@ class Node {
 		return sortedSisters;
 	}
 
+	finalPath(target) {
+		if (target == this) {
+			con.fillStyle = 'yellow';
+			let message = 'D= ' + target.distance;
+			con.fillText(message, target.x, (target.y - 15));
+		}
+
+		con.beginPath();
+
+		let endX = this.previous.x;
+		let endY = this.previous.y; 
+
+		con.moveTo(this.x, this.y);
+		con.lineTo(endX, endY);
+		con.lineWidth = 2;
+
+		con.strokeStyle = 'green';
+		con.stroke();
+		con.closePath();
+
+		con.lineWidth = 1;
+
+		let z = this.previous;
+		if (z.previous.length != 0) {
+			z.finalPath();
+		}
+	}
+
 
 	changeDistance(n) {
 		this.distance = n;
@@ -128,7 +159,7 @@ class Node {
 		return this.weight[x];
 	}
 
-	drawArrow() {
+	drawArrow(edgeC) {
 		for (var s=0; s < this.sisters.length; s++) {
 			con.beginPath();
 
@@ -151,7 +182,7 @@ class Node {
 			con.moveTo(x, y);
 			con.lineTo(endX,endY);
 
-			con.strokeStyle = 'Aquamarine';
+			con.strokeStyle = edgeC;
 			con.stroke();
 
 			angle += (-1.8) * (2 * Math.PI)
@@ -167,7 +198,7 @@ class Node {
 			// draw weight
 
 			con.fillStyle = 'pink';
-			let midX = (20 + endX + this.x) / 2;
+			let midX = (endX + this.x) / 2;
 			let midY = (20 + endY + this.y) / 2;
 			con.fillText(this.weight[s], midX, midY);
 		}
@@ -204,6 +235,11 @@ function createNode() {
 		let p = document.getElementById('prompt');
 		p.style.display = 'none';
 	}
+	else if (path == true) {
+		path = false;
+		updateDraw(nodeList, 'Aquamarine')
+
+	}
 	else {
 		for (n in nodeList)
 			// hitbox
@@ -218,23 +254,34 @@ function createNode() {
 				console.log("verbooten!");
 			}
 		}
-	updateDraw();
+	updateDraw(nodeList, 'Aquamarine');
 	}
 
 function changeNode() {
 	mouseX = event.clientX;
 	mouseY = event.clientY;
 
-	for (n in nodeList) {
-		// hitbox
-		diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
-		if (diff <= 12){
-			first.changeColor('white');
-			first = nodeList[n];
-			first.changeColor('orange');
-			updateDraw();
+	// show paths instead of changing nodes
+	if (path == true) {
+		activateDijkstra()
+	}
+	else {
+		for (n in nodeList) {
+			// hitbox
+			diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+			if (diff <= 12){
+				first.changeColor('white');
+				first = nodeList[n];
+				first.changeColor('orange');
+				updateDraw(nodeList, 'Aquamarine');
+			}
 		}
 	}
+}
+
+function drag() {
+	first.changeXY(mouseX, mouseY);
+	updateDraw(nodeList, 'Aquamarine');
 }
 
 function keyPress() {
@@ -254,13 +301,9 @@ function keyPress() {
 						}
 					}
 				}
-			}	
+			}
+			updateDraw(nodeList, 'Aquamarine');			
 			break;
-		case "Shift":
-			//drag n drop
-			first.changeXY(mouseX, mouseY);
-			break;
-
 		case "Control":
 		// remove edges/nodes
 			if (nodeList.length > 1) { //prevents glitch on empty list
@@ -281,6 +324,7 @@ function keyPress() {
 					}
 				}	
 			}
+			updateDraw(nodeList, 'Aquamarine');		
 			break;
 
 		//decrease weight
@@ -295,6 +339,7 @@ function keyPress() {
 					nodeList[n].changeWeight(first, -1);
 				}
 			}
+			updateDraw(nodeList, 'Aquamarine');
 			break;	
 		//increase weight
 		case 'Right':
@@ -308,29 +353,40 @@ function keyPress() {
 					nodeList[n].changeWeight(first, 1);
 				}
 			}
+			updateDraw(nodeList, 'Aquamarine');
 			break;	
-
-
 		case "Enter":
-			let copy = [];
-			for (n in nodeList) {
-				copy.push(nodeList[n]);
-			}
-			for (n in nodeList){
-				diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
-				
-				//activate dijkstra
-				if (nodeList[n] !== first && diff < 25) {
-					dijkstra(copy, first, nodeList[n]);
-				}
-			}
+			activateDijkstra();
 			break;	
 		}
-		updateDraw();
+		
 	}
 
 
+function mouseDiff() {
+	if (event.button === 0) {
+		createNode();
+	}
+	else if (event.button === 2) {
+		drag();
+	}
+}
 
+function activateDijkstra() {
+	path = true;
+	let copy = [];
+	for (n in nodeList) {
+		copy.push(nodeList[n]);
+	}
+	for (n in nodeList){
+		diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+		
+		//activate dijkstra
+		if (nodeList[n] !== first && diff < 25) {
+			dijkstra(copy, first, nodeList[n]);
+		}
+	}
+}
 
 function pythagoras(x1, y1, x2, y2) {
 	let dx = (x1 - x2);
@@ -339,19 +395,19 @@ function pythagoras(x1, y1, x2, y2) {
 	return diff;
 }
 
-function updateDraw() {
+function updateDraw(list, c) {
 	// when graph changes call this to update
 	con.fillStyle = 'black';
 	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
-	for (n in nodeList) {
-		nodeList[n].draw()
+	for (n in list) {
+		list[n].draw()
 	}
-	drawEdges();
+	drawEdges(c);
 }
 
-function drawEdges() {
+function drawEdges(c) {
 	for (n in nodeList) {
-		nodeList[n].drawArrow();
+		nodeList[n].drawArrow(c);
 	}
 }
 
@@ -369,9 +425,7 @@ function menu(menu) {
 }
 
 function disp() {
-	for (n in nodeList) {
-			console.log(nodeList[n]);		
-	}
+	console.log(nodeList);
 }
 
 function dijkstra(list, source, target) {
@@ -390,9 +444,6 @@ function dijkstra(list, source, target) {
 	while (list.length > 0) {
 		let min = 100000000000;
 		let activeNode = 'f';
-		// console.log("LENGTH");
-		// console.log(list.length);
-
 
 		for (n in list) {
 			if (list[n].distance < min) {
@@ -400,18 +451,13 @@ function dijkstra(list, source, target) {
 				activeNode = list[n];
 			}
 		}
-		// console.log('ACTIVE')
-		// console.log(activeNode);
 		visited.push(activeNode);
 		list.splice(list.indexOf(activeNode), 1);
+		updateDraw(visited, 'red');
 
-		// sis = activeNode.showSisters();
 		let sis = activeNode.sisters;
-		// console.log('sis');
-		// console.log(sis);
-		// console.log(activeNode.sisters);
+
 		for (s in sis) {
-			// BELOW SHOULD BE WEIGHT NOT .distance
 			// ALSO DON'T FORGET TO SORT SIS LATER
 			let altPath = activeNode.distance + activeNode.findWeight(sis[s]);
 			if (altPath <= sis[s].distance){
@@ -419,11 +465,17 @@ function dijkstra(list, source, target) {
 				sis[s].changePrevious(activeNode);
 			}
 		}
-		// console.log('LOOP');
 	}
+
+
 	console.log('target distance:');
 
 	console.log(target.distance);
+	console.log(source.previous);
+	console.log(target.previous);
+
+	target.finalPath(target);
+
 
 	for (n in visited) {
 		visited[n].changeDistance(99999999999);
