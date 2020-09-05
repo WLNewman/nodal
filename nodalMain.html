@@ -22,6 +22,17 @@
 			float: top;
 		}
 
+		.box {
+			width: 50%;
+			background-color: rgb(125, 125, 125);
+			border-color: rgb(125, 125, 125);
+			/*border-left-width: 0px;
+			border-top-width: 0px;
+			border-bottom-width: 0px;*/
+			/*border-radius: 6px;*/
+			box-shadow: none;
+		}
+
 		.menu {
 			background-color: rgb(25,25,25);
 			border-radius: 3px;
@@ -79,6 +90,14 @@
 			z-index: -1;
 		}
 
+		.sub {
+			background-color: rgb(125, 125, 125);
+			border-color: rgb(125, 125, 125);
+			border-radius: 6px;
+			padding-left: 45px;
+			padding-right: 50px;
+		}
+
 	</style>
 
 
@@ -92,7 +111,7 @@
 		<title>NoDAL</title>
 	</head>
 		<header>
-			<a href="https://amazon.com">
+			<a href="https://github.com/WLNewman">
 			<img src="NodalPictures/nodalLogo.png" width="125" alt ="nodal Logo"/>
 			</a>
 			
@@ -118,18 +137,29 @@
 	</head>
 
 
-	<body id="main" style="background-color: black">
+	<body id="main" oncontextmenu="return false;" style="background-color: black">
 
 		<div id="plusMenu" class="menu" style="color: white">
 			<i>Insert:</i>
 			<br/>
-			<i>C<sub>n</sub></i><input type='radio' name='btn'/>
-			<i>K<sub>n</sub></i><input type='radio' name='btn'/>
-			<i>T<sub>n</sub></i><input type='radio' name='btn'/>
-
+			<i>C<sub>n</sub></i><input type='radio' name='btn' value='C'/>
+			<i>K<sub>n</sub></i><input type='radio' name='btn' value='K'/>
+			<i>T<sub>n</sub></i><input type='radio' name='btn' value='B'/>
+			<br/><br/>
+			<i>n = </i>
+			<input type="number" name="num" min="1" max="6" class='box'/>
+			<hr/>
+			<button id="add" class="sub">Add!</button>
 		</div>
 		<div id="algorithmMenu" class="menu" style="color: white">
 			<i>Algorithms:</i> 
+			<br/>			
+			<input type="radio" name="bott"/><i>Dijkstra</i>
+			<br/>
+			<br/>
+			<br/>
+			<hr/>
+			<button class="sub" style="padding-right: 58px"><i>Go!</i></button>
 		</div>
 
 
