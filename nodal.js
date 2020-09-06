@@ -1,6 +1,7 @@
 const graph = document.getElementById('graph');
 const con = graph.getContext('2d');
 const font = con.font = " 12px Trebuchet MS";
+// const pMenu = document.getElementById('plusMenu');
 
 
 graph.addEventListener('DOMContentLoaded', init());
@@ -9,6 +10,8 @@ graph.addEventListener('mouseup', drawEdges);
 document.addEventListener('keydown', keyPress);
 document.addEventListener('mousemove', changeNode);
 graph.addEventListener('click', disp);
+// pMenu.addEventListener('click', makeGrid);
+
 
 
 let nodeList = [];
@@ -175,8 +178,9 @@ class Node {
 
 function init() {
 	// set up the canvas for drawing (sorry about the horrendous length for controls)
-	alert('CONTROLS:\nAdd node: click\n\nMove node: right click\n\nPathfinder: go to \'A\' in the top right, hit go and select node\n\nAdd edge: hover near target edge and press space\n\nDelete node: ctrl on top\n\nDelete edge: same as add edge, but use ctrl\n\n'
+	alert('CONTROLS:\nAdd node: click\n\nMove node: right click\n\nPathfinder: go to \'A\' in the top right, hit go and select node\n\nAdd edge: hover near target edge and press space\n\nChange edge distance (num in middle): < or > near target node\n\nDelete node: ctrl on top\n\nDelete edge: same as add edge, but use ctrl\n\n'
 )
+
 	let canvas = document.getElementById('graph');
 	if(graph.getContext) {
 		let con = graph.getContext('2d');
@@ -280,6 +284,43 @@ function drawEdges(c) {
 	}
 }
 
+function makeGrid(){
+	erase();
+	let p = document.getElementById('prompt');
+	p.style.display = 'none';
+
+	let lenG = 8
+	let aX = (.75/lenG) * (window.innerWidth);
+	let aY = (2/10) * (window.innerHeight);
+	for(i=1; i < 9; i++){
+		for(j=1; j < lenG; j++){
+			first = new Node(aX, aY, 'white', []);
+			aX += (1/lenG) * (window.innerWidth);
+		}
+		aX = (.75/lenG) * (window.innerWidth);
+		aY += (1/10) * (window.innerHeight);
+	}
+	for (n in nodeList){
+		if (n % (lenG - 1) !== 0){ //add node to left
+			let les = nodeList[n];
+			let nextt = nodeList[n-1];
+			les.addSister(nextt);
+			nextt.addSister(les);
+		}
+		
+
+		if (n >= (lenG - 1)) { //add node below
+		 	let u = nodeList[n];
+		 	console.log(u);
+		 	console.log('f');
+		 	let i = nodeList[n - (lenG-1)];
+		  	i.addSister(u);
+		  	u.addSister(i);
+		}
+	}
+	updateDraw(nodeList, "Aquamarine");
+}
+
 function menu(menu) {
 	// display a hidden menu's contents
 	let i = document.getElementById(menu);
@@ -328,7 +369,7 @@ function keyPress() {
 						first.changeColor('orange');
 					}
 					//delete edge between first and other
-					 else if (nodeList[n] !== first && diff < 25) {
+					 else if (diff < 25 && first.notSister(nodelist[n]) == true) {
 						first.removeSister(nodeList[n]);
 						nodeList[n].removeSister(first);
 					}
@@ -344,7 +385,7 @@ function keyPress() {
 				diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
 				
 				//delete edge between first and other
-				if (nodeList[n] !== first && diff < 25) {
+				if (nodeList[n] !== first && diff < 35) {
 					first.changeWeight(nodeList[n], -1);
 					nodeList[n].changeWeight(first, -1);
 				}
@@ -358,13 +399,16 @@ function keyPress() {
 				diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
 				
 				//delete edge between first and other
-				if (nodeList[n] !== first && diff < 25) {
+				if (nodeList[n] !== first && diff < 35) {
 					first.changeWeight(nodeList[n], 1);
 					nodeList[n].changeWeight(first, 1);
 				}
 			}
 			updateDraw(nodeList, 'Aquamarine');
-			break;	
+			break;
+		case 'Alt':
+			makeGrid();	
+			updateDraw(nodeList, 'Aquamarine');
 		}		
 	}
 
@@ -421,7 +465,6 @@ function dijkstra(list, source, target) {
 		let sis = activeNode.sisters;
 
 		for (s in sis) {
-			// ALSO DON'T FORGET TO SORT SIS LATER
 			let altPath = activeNode.distance + activeNode.findWeight(sis[s]);
 			if (altPath <= sis[s].distance){
 				sis[s].changeDistance(altPath);
