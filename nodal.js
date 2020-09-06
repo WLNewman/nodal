@@ -9,7 +9,6 @@ graph.addEventListener('mouseup', drawEdges);
 document.addEventListener('keydown', keyPress);
 document.addEventListener('mousemove', changeNode);
 graph.addEventListener('click', disp);
-// document.getElementById('add').addEventListener('click', kFive());
 
 
 let nodeList = [];
@@ -50,7 +49,11 @@ class Node {
 		this.sisters.push(node);
 		this.weight.push(1);
 	}
-
+	removeSister(n) {
+		let x = this.sisters.indexOf(n);
+		this.sisters.splice(x, 1);
+		this.weight.splice(x, 1);
+	}
 	deleteSelf() {
 		// delete reference to self as sister
 		let s = 0;
@@ -58,11 +61,7 @@ class Node {
 			this.sisters[s].removeSister(this);
 		}
 	}
-	removeSister(n) {
-		let x = this.sisters.indexOf(n);
-		this.sisters.splice(x, 1);
-		this.weight.splice(x, 1);
-	}
+
 
 	notSister(n) {
 		// used to verify no parallel edges don't know why I needed to declare s
@@ -75,35 +74,8 @@ class Node {
 		return true;
 	}
 
-	showSisters() {
-		let sortedSisters = []
-		let sis = 0;
-		console.log('fu');
-
-		for (sis in this.sisters){
-			console.log('fuu');
-
-			sortedSisters.push(this.sisters[sis]);
-		}
-		//bubble sort bad, I know but there's only a few elements per list
-		let sorting = true;
-		while (sorting == true && sortedSisters.length > 1) {
-			sorting = false
-			console.log('fuuu');
-			for (s in (sortedSisters.length - 1)){
-				if (sortedSisters[s].weight[s] > sortedSisters[s + 1].weight[s]){
-					sorting = false;
-					let index1 = sortedSisters[s];
-					let index2 = sortedSisters[s+1];
-					sortedSisters[s] = index2;
-					sortedSisters[s + 1] = index1;
-				}
-			}
-		}
-		return sortedSisters;
-	}
-
 	finalPath(target) {
+		// draw the shortest pathway
 		if (target == this) {
 			con.fillStyle = 'yellow';
 			let message = 'D= ' + target.distance;
@@ -135,25 +107,20 @@ class Node {
 	changeDistance(n) {
 		this.distance = n;
 	}
-
 	changePrevious(n) {
 		this.previous = n;
 	}
-
 	changeColor(c) {
 		this.color = c;
 	}
-
 	changeXY(x, y) {
 		this.x = x;
 		this.y = y;
 	}
-
 	changeWeight(s, num) {
 		let ind = this.sisters.indexOf(s);
 		this.weight[ind] += num;
 	}
-
 	findWeight(s) {
 		let x = this.sisters.indexOf(s);
 		return this.weight[x];
@@ -206,28 +173,26 @@ class Node {
 }
 
 
-function erase() {
-	// the erase button
-	nodeList = [];
-	first = 0;
-	con.fillStyle = 'black';
-	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
-	console.log("clear");
-}
-
 function init() {
-	// set up the canvas for drawing
+	// set up the canvas for drawing (sorry about the horrendous length for controls)
+	alert('CONTROLS:\nAdd node: click\n\nMove node: right click\n\nPathfinder: go to \'A\' in the top right, hit go and select node\n\nAdd edge: hover near target edge and press space\n\nDelete node: ctrl on top\n\nDelete edge: same as add edge, but use ctrl\n\n'
+)
 	let canvas = document.getElementById('graph');
 	if(graph.getContext) {
 		let con = graph.getContext('2d');
 
 		con.canvas.width = window.innerWidth;
 		con.canvas.height = window.innerHeight;
-
-		console.log('success');
 	}
 }
 
+function erase() {
+	// the erase button
+	nodeList = [];
+	first = 0;
+	con.fillStyle = 'black';
+	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
+}
 
 function createNode() {
 	if (first == 0) {
@@ -238,7 +203,6 @@ function createNode() {
 	else if (path == true) {
 		path = false;
 		updateDraw(nodeList, 'Aquamarine')
-
 	}
 	else {
 		for (n in nodeList)
@@ -269,7 +233,7 @@ function changeNode() {
 		for (n in nodeList) {
 			// hitbox
 			diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
-			if (diff <= 12){
+			if (diff <= 8){
 				first.changeColor('white');
 				first = nodeList[n];
 				first.changeColor('orange');
@@ -279,9 +243,56 @@ function changeNode() {
 	}
 }
 
+function mouseDiff() {
+	if (event.button === 0) {
+		createNode();
+	}
+	else if (event.button === 2) {
+		drag();
+	}
+}
+
 function drag() {
 	first.changeXY(mouseX, mouseY);
 	updateDraw(nodeList, 'Aquamarine');
+}
+
+function pythagoras(x1, y1, x2, y2) {
+	let dx = (x1 - x2);
+	let dy = (y1 - y2);
+	let diff = Math.sqrt((dx ** 2) + (dy ** 2));
+	return diff;
+}
+
+function updateDraw(list, c) {
+	// when graph changes call this to update
+	con.fillStyle = 'black';
+	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
+	for (n in list) {
+		list[n].draw()
+	}
+	drawEdges(c);
+}
+
+function drawEdges(c) {
+	for (n in nodeList) {
+		nodeList[n].drawArrow(c);
+	}
+}
+
+function menu(menu) {
+	// display a hidden menu's contents
+	let i = document.getElementById(menu);
+	if(i.style.display === "block"){
+		i.style.display = "none";
+	}
+	else {
+		i.style.display = "block";
+	}
+}
+
+function disp() {
+	console.log(nodeList);
 }
 
 function keyPress() {
@@ -292,8 +303,7 @@ function keyPress() {
 				if (nodeList[n] !== first){
 					// prevent looping
 					diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
-					console.log(diff);
-					if (diff < 25) {
+					if (diff < 35) {
 						// prevent parallel edges
 						if (first.notSister(nodeList[n])){
 							first.addSister(nodeList[n]);
@@ -355,77 +365,34 @@ function keyPress() {
 			}
 			updateDraw(nodeList, 'Aquamarine');
 			break;	
-		case "Enter":
-			activateDijkstra();
-			break;	
-		}
-		
+		}		
 	}
 
-
-function mouseDiff() {
-	if (event.button === 0) {
-		createNode();
-	}
-	else if (event.button === 2) {
-		drag();
-	}
-}
 
 function activateDijkstra() {
-	path = true;
-	let copy = [];
-	for (n in nodeList) {
-		copy.push(nodeList[n]);
-	}
-	for (n in nodeList){
-		diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
-		
-		//activate dijkstra
-		if (nodeList[n] !== first && diff < 25) {
-			dijkstra(copy, first, nodeList[n]);
+	let choice = document.getElementsByName('bott');
+	if (path == false) {
+	alert('now please select the target');}
+	path = true; 
+	for (i=0; i < choice.length; i++){
+		if (choice[i].checked && choice[i].value == 'dijkstra'){
+			let copy = [];
+			for (n in nodeList) {
+				copy.push(nodeList[n]);
+			}
+			for (n in nodeList){
+				diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+				
+				//activate dijkstra
+				if (nodeList[n] !== first && diff < 25) {
+					dijkstra(copy, first, nodeList[n]);
+				}
+			}
+		}
+		else if (choice[i].checked && choice[i].value == 'A*'){
+			console.log('placeholder');
 		}
 	}
-}
-
-function pythagoras(x1, y1, x2, y2) {
-	let dx = (x1 - x2);
-	let dy = (y1 - y2);
-	let diff = Math.sqrt((dx ** 2) + (dy ** 2));
-	return diff;
-}
-
-function updateDraw(list, c) {
-	// when graph changes call this to update
-	con.fillStyle = 'black';
-	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
-	for (n in list) {
-		list[n].draw()
-	}
-	drawEdges(c);
-}
-
-function drawEdges(c) {
-	for (n in nodeList) {
-		nodeList[n].drawArrow(c);
-	}
-}
-
-
-
-function menu(menu) {
-	// display a hidden menu's contents
-	let i = document.getElementById(menu);
-	if(i.style.display === "block"){
-		i.style.display = "none";
-	}
-	else {
-		i.style.display = "block";
-	}
-}
-
-function disp() {
-	console.log(nodeList);
 }
 
 function dijkstra(list, source, target) {
@@ -433,12 +400,8 @@ function dijkstra(list, source, target) {
 	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
 	source.changeDistance(0);
-	console.log("SOURCE");
-	console.log(source);
-	console.log(list);
 
 	let visited = [];
-
 	var len = list.length;
 
 	while (list.length > 0) {
@@ -467,15 +430,7 @@ function dijkstra(list, source, target) {
 		}
 	}
 
-
-	console.log('target distance:');
-
-	console.log(target.distance);
-	console.log(source.previous);
-	console.log(target.previous);
-
 	target.finalPath(target);
-
 
 	for (n in visited) {
 		visited[n].changeDistance(99999999999);
