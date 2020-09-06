@@ -136,17 +136,12 @@
 
 	<body id="main" oncontextmenu="return false;" style="background-color: black">
 
-		<div id="plusMenu" class="menu" style="color: white; height: 140px; width: 140px;">
+		<div id="plusMenu" class="menu" style="color: white; height: 75px; width: 125px;">
 			<i>Insert:</i>
 			<br/>
-			<i>C<sub>n</sub></i><input type='radio' name='btn' value='C'/>
-			<i>K<sub>n</sub></i><input type='radio' name='btn' value='K'/>
-			<i>T<sub>n</sub></i><input type='radio' name='btn' value='B'/>
-			<br/><br/>
-			<i>n = </i>
-			<input type="number" name="num" min="1" max="6" class='box'/>
+			grid<input type='radio' name='btn' value='B' checked="true"/>
 			<hr/>
-			<button id="add" class="sub">(Under repair)</button>
+			<button id="add" onclick="makeGrid()" class="sub">Add!</button>
 		</div>
 		<div id="algorithmMenu" class="menu" style="color: white">
 			<i>Algorithms:</i> 
