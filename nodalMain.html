@@ -100,8 +100,6 @@
 
 	</style>
 
-
-
 	<head>
 		<meta charset="UTF-8">
 		<meta name="description" content="Graph Theory Visualized">
@@ -136,10 +134,9 @@
 		</header>
 	</head>
 
-
 	<body id="main" oncontextmenu="return false;" style="background-color: black">
 
-		<div id="plusMenu" class="menu" style="color: white">
+		<div id="plusMenu" class="menu" style="color: white; height: 140px; width: 140px;">
 			<i>Insert:</i>
 			<br/>
 			<i>C<sub>n</sub></i><input type='radio' name='btn' value='C'/>
@@ -149,19 +146,18 @@
 			<i>n = </i>
 			<input type="number" name="num" min="1" max="6" class='box'/>
 			<hr/>
-			<button id="add" class="sub">Add!</button>
+			<button id="add" class="sub">(Under repair)</button>
 		</div>
 		<div id="algorithmMenu" class="menu" style="color: white">
 			<i>Algorithms:</i> 
 			<br/>			
-			<input type="radio" name="bott"/><i>Dijkstra</i>
+			<input type="radio" name="bott" checked="true" value='dijkstra'/><i>Dijkstra</i>
 			<br/>
 			<br/>
 			<br/>
 			<hr/>
-			<button class="sub" style="padding-right: 58px"><i>Go!</i></button>
+			<button id='Go' class="sub" style="padding-right: 58px" onclick="activateDijkstra()"><i>Go!</i></button>
 		</div>
-
 
 		<canvas id='graph' class='canvas' value="your browser does not support this"></canvas>
 
