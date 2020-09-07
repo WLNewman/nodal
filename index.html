@@ -136,19 +136,21 @@
 
 	<body id="main" oncontextmenu="return false;" style="background-color: black">
 
-		<div id="plusMenu" class="menu" style="color: white; height: 75px; width: 125px;">
+		<div id="plusMenu" class="menu" style="color: white; height: 98px; width: 125px;">
 			<i>Insert:</i>
 			<br/>
-			grid<input type='radio' name='btn' value='B' checked="true"/>
-			<hr/>
-			<button id="add" onclick="makeGrid()" class="sub">Add!</button>
-		</div>
-		<div id="algorithmMenu" class="menu" style="color: white">
-			<i>Algorithms:</i> 
-			<br/>			
-			<input type="radio" name="bott" value='dijkstra'/><i>Dijkstra</i>
+			grid<input type='radio' name='btn' value='grid'/>
 			<br/>
-			<input type="radio" name="bott" value='A*'/><i>A*</i>
+			Random grid<input type='radio' name='btn' value='random'/>
+			<hr/>
+			<button id="add" class="sub">Add!</button>
+		</div>
+		<div id="algorithmMenu" class="menu" style="color: white; height: 100px">
+			<i>Algorithms:</i> 
+			<br/>
+			<input type="radio" name="bott" value='A*'/>A*
+			<br/>			
+			<input type="radio" name="bott" value='dijkstra'/>Dijkstra
 			<br/>
 			<hr/>
 			<button id='Go' class="sub" style="padding-right: 58px" onclick="activateDijkstra()"><i>Go!</i></button>
