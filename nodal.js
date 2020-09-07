@@ -37,6 +37,7 @@ class Node {
 		this.weight = []
 		this.weight.push(1);
 		nodeList.push(this);
+		this.goal = 100000000000;
 	}
 
 	// following draws when created
@@ -105,8 +106,20 @@ class Node {
 			z.finalPath();
 		}
 	}
-
-
+	findGoal() {
+		return this.goal;
+	}
+	changeGoal(h) {
+		this.goal = this.distance + this.findHueristic(h);
+	}
+	findHueristic(n) {
+		// used to estimate distance in A*
+		let dX = (n.x - this.x);
+		// 2.361 because grid isn't square
+		let dY = 2.361 * (n.y - this.y);
+		// 170 is distance in pixels
+		return (Math.sqrt((dX * dX) + (dY * dY)) / 170);
+	}
 	changeDistance(n) {
 		this.distance = n;
 	}
@@ -311,8 +324,6 @@ function makeGrid(){
 
 		if (n >= (lenG - 1)) { //add node below
 		 	let u = nodeList[n];
-		 	console.log(u);
-		 	console.log('f');
 		 	let i = nodeList[n - (lenG-1)];
 		  	i.addSister(u);
 		  	u.addSister(i);
@@ -369,7 +380,7 @@ function keyPress() {
 						first.changeColor('orange');
 					}
 					//delete edge between first and other
-					 else if (diff < 25 && first.notSister(nodelist[n]) == true) {
+					 else if (diff < 25 && first.notSister(nodeList[n]) == true) {
 						first.removeSister(nodeList[n]);
 						nodeList[n].removeSister(first);
 					}
@@ -406,9 +417,6 @@ function keyPress() {
 			}
 			updateDraw(nodeList, 'Aquamarine');
 			break;
-		case 'Alt':
-			makeGrid();	
-			updateDraw(nodeList, 'Aquamarine');
 		}		
 	}
 
@@ -416,7 +424,7 @@ function keyPress() {
 function activateDijkstra() {
 	let choice = document.getElementsByName('bott');
 	if (path == false) {
-	alert('now please select the target');}
+	alert('Now please select the target\nRed means visited, green means path\n\nNOTE: A* OPTOMIZED FOR GRID UNDER \'+\'');}
 	path = true; 
 	for (i=0; i < choice.length; i++){
 		if (choice[i].checked && choice[i].value == 'dijkstra'){
@@ -434,7 +442,14 @@ function activateDijkstra() {
 			}
 		}
 		else if (choice[i].checked && choice[i].value == 'A*'){
-			console.log('placeholder');
+			for (n in nodeList){
+				diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
+				
+				//activate dijkstra
+				if (nodeList[n] !== first && diff < 25) {
+					aStar(first, nodeList[n]);
+				}
+			}
 		}
 	}
 }
@@ -478,5 +493,74 @@ function dijkstra(list, source, target) {
 	for (n in visited) {
 		visited[n].changeDistance(99999999999);
 		visited[n].changePrevious([]);
+	}
+}
+
+function aStar(source, target) {
+	con.fillStyle = 'black';
+	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+	source.changeDistance(0);
+	source.changeGoal(target);
+
+	let list = []
+	let visited = [];
+	list.push(source);
+	let finish = false;
+	var len = list.length;
+
+	while (list.length > 0 && finish == false) {
+		let min = 9999999999999;
+		let activeNode = 'f';
+
+		for (n in list) {
+			if (list[n].goal < min) {
+				min = list[n].goal;
+				activeNode = list[n];
+			}
+		}
+		visited.push(activeNode);
+		console.log(activeNode);
+		list.splice(list.indexOf(activeNode), 1);
+
+		if (activeNode == target) {
+				console.log("yeet");
+				finish = true;
+				for (v in visited) {
+					visited[v].draw()
+					visited[v].drawArrow('red');
+				}
+				target.finalPath(target);
+				list = [];
+			}
+
+		let sis = activeNode.sisters;
+
+		for (n in sis) {
+			if (visited.includes(sis[n]))
+				{null;}
+
+			else if (list.includes(sis[n]) == false) {
+				list.push(sis[n]);
+				sis[n].changePrevious(activeNode);
+				sis[n].changeDistance(activeNode.distance + activeNode.findWeight(sis[n]));
+				sis[n].goal = sis[n].distance + sis[n].findHueristic(target);
+				}
+
+			else if (list.includes(sis[n])) {
+				let altPath = activeNode.distance + activeNode.findWeight(sis[n]);
+				if (altPath <= sis[n].distance){
+					sis[n].changeDistance(altPath);
+					sis[n].changePrevious(activeNode);
+					sis[n].goal = sis[n].distance + sis[n].findHueristic(target);
+				}
+			}
+		}
+	}
+	
+	for (n in visited) {
+		visited[n].changeDistance(99999999999);
+		visited[n].changePrevious([]);
+		visited[n].goal = 100000000000;
 	}
 }
