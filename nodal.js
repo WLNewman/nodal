@@ -1,8 +1,7 @@
 const graph = document.getElementById('graph');
 const con = graph.getContext('2d');
 const font = con.font = " 12px Trebuchet MS";
-// const pMenu = document.getElementById('plusMenu');
-
+const add = document.getElementById('add');
 
 graph.addEventListener('DOMContentLoaded', init());
 graph.addEventListener('mousedown', mouseDiff);
@@ -10,7 +9,8 @@ graph.addEventListener('mouseup', drawEdges);
 document.addEventListener('keydown', keyPress);
 document.addEventListener('mousemove', changeNode);
 graph.addEventListener('click', disp);
-// pMenu.addEventListener('click', makeGrid);
+add.addEventListener('click', makeGrid);
+
 
 
 
@@ -37,7 +37,7 @@ class Node {
 		this.weight = []
 		this.weight.push(1);
 		nodeList.push(this);
-		this.goal = 100000000000;
+		this.goal = 100000000000; //goal is distance + hueristic in A*
 	}
 
 	// following draws when created
@@ -68,7 +68,7 @@ class Node {
 
 
 	notSister(n) {
-		// used to verify no parallel edges don't know why I needed to declare s
+		// verifies the n is not already a sister, prevents parallel edges
 		let s = 0;
 		for (s in this.sisters) {
 			if (this.sisters[s] == n) {
@@ -79,7 +79,7 @@ class Node {
 	}
 
 	finalPath(target) {
-		// draw the shortest pathway
+		// draw the shortest pathway for algorithm
 		if (target == this) {
 			con.fillStyle = 'yellow';
 			let message = 'D= ' + target.distance;
@@ -106,7 +106,7 @@ class Node {
 			z.finalPath();
 		}
 	}
-	findGoal() {
+	findGoal() { 
 		return this.goal;
 	}
 	changeGoal(h) {
@@ -191,7 +191,7 @@ class Node {
 
 function init() {
 	// set up the canvas for drawing (sorry about the horrendous length for controls)
-	alert('CONTROLS:\nAdd node: click\n\nMove node: right click\n\nPathfinder: go to \'A\' in the top right, hit go and select node\n\nAdd edge: hover near target edge and press space\n\nChange edge distance (num in middle): < or > near target node\n\nDelete node: ctrl on top\n\nDelete edge: same as add edge, but use ctrl\n\n'
+	alert('CONTROLS:\n\nAdd node: click\n\nMove node: right click\n\nPathfinder: go to \'A\' in the top right, hit go and select node\n\nAdd edge: hover near target edge and press space\n\nChange edge distance (num in middle): < or > near target node\n\nDelete node: ctrl on top\n\n'
 )
 
 	let canvas = document.getElementById('graph');
@@ -285,10 +285,10 @@ function updateDraw(list, c) {
 	// when graph changes call this to update
 	con.fillStyle = 'black';
 	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
+	drawEdges(c);
 	for (n in list) {
 		list[n].draw()
 	}
-	drawEdges(c);
 }
 
 function drawEdges(c) {
@@ -298,42 +298,76 @@ function drawEdges(c) {
 }
 
 function makeGrid(){
-	erase();
-	let p = document.getElementById('prompt');
-	p.style.display = 'none';
+	// auto grid creation; random var will randomly remove grid members
+	let option = document.getElementsByName('btn');
+	let random = 'x';
 
-	let lenG = 8
-	let aX = (.75/lenG) * (window.innerWidth);
-	let aY = (2/10) * (window.innerHeight);
-	for(i=1; i < 9; i++){
-		for(j=1; j < lenG; j++){
-			first = new Node(aX, aY, 'white', []);
-			aX += (1/lenG) * (window.innerWidth);
+	for (i=0; i < option.length; i++){
+		if (option[i].checked && option[i].value == 'grid'){
+			random = false;
+			option[i].checked = false;
 		}
-		aX = (.75/lenG) * (window.innerWidth);
-		aY += (1/10) * (window.innerHeight);
-	}
-	for (n in nodeList){
-		if (n % (lenG - 1) !== 0){ //add node to left
-			let les = nodeList[n];
-			let nextt = nodeList[n-1];
-			les.addSister(nextt);
-			nextt.addSister(les);
-		}
-		
-
-		if (n >= (lenG - 1)) { //add node below
-		 	let u = nodeList[n];
-		 	let i = nodeList[n - (lenG-1)];
-		  	i.addSister(u);
-		  	u.addSister(i);
+		else if (option[i].checked && option[i].value == 'random') {
+			random = true;
+			option[i].checked = false;
 		}
 	}
+
+	if (random !== 'x') { //did this because js freaks if neither button selected
+		erase();
+		let p = document.getElementById('prompt');
+		p.style.display = 'none';
+
+		let lenG = 8
+		let aX = (.75/lenG) * (window.innerWidth);
+		let aY = (2/10) * (window.innerHeight);
+		for(i=1; i < 9; i++){
+			for(j=1; j < lenG; j++){
+				first = new Node(aX, aY, 'white', []);
+				aX += (1/lenG) * (window.innerWidth);
+			}
+			aX = (.75/lenG) * (window.innerWidth);
+			aY += (1/10) * (window.innerHeight);
+		}
+		for (n in nodeList){
+			if (n % (lenG - 1) !== 0){ //add node to left
+				let les = nodeList[n];
+				let nextt = nodeList[n-1];
+				les.addSister(nextt);
+				nextt.addSister(les);
+			}
+			
+
+			if (n >= (lenG - 1)) { //add node below
+			 	let u = nodeList[n];
+			 	let i = nodeList[n - (lenG-1)];
+			  	i.addSister(u);
+			  	u.addSister(i);
+			}
+		}
+	}
+
+	if (random == true) {
+		for (n in nodeList) {
+			let fate = (Math.floor(Math.random() * 3) % 2);
+			console.log(fate);
+			if (fate != 0) {
+				nodeList[n].deleteSelf();
+				nodeList.splice(n, 1);
+			}
+		}
+	}
+
+	console.log(first);
+	first = nodeList[0];
+	console.log(first);
+
+
 	updateDraw(nodeList, "Aquamarine");
 }
 
 function menu(menu) {
-	// display a hidden menu's contents
+	// display a hidden menu's contents (ie +, A menus)
 	let i = document.getElementById(menu);
 	if(i.style.display === "block"){
 		i.style.display = "none";
@@ -367,7 +401,7 @@ function keyPress() {
 			updateDraw(nodeList, 'Aquamarine');			
 			break;
 		case "Control":
-		// remove edges/nodes
+		// remove nodes
 			if (nodeList.length > 1) { //prevents glitch on empty list
 				for (n in nodeList){
 					diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
@@ -378,11 +412,6 @@ function keyPress() {
 						nodeList.splice(n, 1);
 						first = nodeList[0];
 						first.changeColor('orange');
-					}
-					//delete edge between first and other
-					 else if (diff < 25 && first.notSister(nodeList[n]) == true) {
-						first.removeSister(nodeList[n]);
-						nodeList[n].removeSister(first);
 					}
 				}	
 			}
@@ -422,9 +451,10 @@ function keyPress() {
 
 
 function activateDijkstra() {
+	// actually activates any algorithm, but I'm too lazy to change
 	let choice = document.getElementsByName('bott');
 	if (path == false) {
-	alert('Now please select the target\nRed means visited, green means path\n\nNOTE: A* OPTOMIZED FOR GRID UNDER \'+\'');}
+	alert('Now please select the target\n\nRed means the algorithm saw that path\n\nTry comparing the algorithms!\n');}
 	path = true; 
 	for (i=0; i < choice.length; i++){
 		if (choice[i].checked && choice[i].value == 'dijkstra'){
@@ -527,9 +557,10 @@ function aStar(source, target) {
 				console.log("yeet");
 				finish = true;
 				for (v in visited) {
-					visited[v].draw()
 					visited[v].drawArrow('red');
+					visited[v].draw()
 				}
+				source.changePrevious([]);//fixes 'phantom path' glitch where source gets previous
 				target.finalPath(target);
 				list = [];
 			}
@@ -557,7 +588,9 @@ function aStar(source, target) {
 			}
 		}
 	}
-	
+
+	console.log(target.distance);
+
 	for (n in visited) {
 		visited[n].changeDistance(99999999999);
 		visited[n].changePrevious([]);
