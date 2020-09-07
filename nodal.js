@@ -369,11 +369,11 @@ function makeGrid(){
 function menu(menu) {
 	// display a hidden menu's contents (ie +, A menus)
 	let i = document.getElementById(menu);
-	if(i.style.display === "block"){
-		i.style.display = "none";
+	if(i.style.display === "none"){
+		i.style.display = "block";
 	}
 	else {
-		i.style.display = "block";
+		i.style.display = "none";
 	}
 }
 
