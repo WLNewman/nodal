@@ -492,8 +492,9 @@ function dijkstra(list, source, target) {
 
 	let visited = [];
 	var len = list.length;
+	let finish = false;
 
-	while (list.length > 0) {
+	while (list.length > 0 && finish == false) {
 		let min = 100000000000;
 		let activeNode = 'f';
 
@@ -505,7 +506,10 @@ function dijkstra(list, source, target) {
 		}
 		visited.push(activeNode);
 		list.splice(list.indexOf(activeNode), 1);
-		updateDraw(visited, 'red');
+
+		if (activeNode == target) {
+			finish = true;
+		}
 
 		let sis = activeNode.sisters;
 
@@ -516,6 +520,11 @@ function dijkstra(list, source, target) {
 				sis[s].changePrevious(activeNode);
 			}
 		}
+	}
+
+	for (v in visited) {
+		visited[v].drawArrow('red');
+		visited[v].draw()
 	}
 
 	target.finalPath(target);
