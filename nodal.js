@@ -11,9 +11,6 @@ document.addEventListener('mousemove', changeNode);
 graph.addEventListener('click', disp);
 add.addEventListener('click', makeGrid);
 
-
-
-
 let nodeList = [];
 let pathWay = [];
 let first = 0;
@@ -93,7 +90,7 @@ class Node {
 
 		con.moveTo(this.x, this.y);
 		con.lineTo(endX, endY);
-		con.lineWidth = 2;
+		con.lineWidth = 5;
 
 		con.strokeStyle = 'green';
 		con.stroke();
@@ -102,7 +99,7 @@ class Node {
 		con.lineWidth = 1;
 
 		let z = this.previous;
-		if (z.previous.length != 0) {
+		if (z.previous.length != []) {
 			z.finalPath();
 		}
 	}
@@ -522,16 +519,33 @@ function dijkstra(list, source, target) {
 		}
 	}
 
-	for (v in visited) {
-		visited[v].drawArrow('red');
-		visited[v].draw()
-	}
-
+	badPath(visited);
 	target.finalPath(target);
 
 	for (n in visited) {
 		visited[n].changeDistance(99999999999);
 		visited[n].changePrevious([]);
+	}
+}
+
+function badPath(v) {
+	//animation that plays for all paths colored red
+
+	con.fillStyle = 'black';
+	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+	for (i = 0; i < v.length; i++) {
+
+	// create a closure to preserve the value of "i"
+	let drawn = (function(i){
+	    window.setTimeout(function(){
+	    v[i].drawArrow('red');
+		v[i].draw()
+
+	    }, i * 35);
+
+
+	  }(i))
 	}
 }
 
@@ -565,11 +579,9 @@ function aStar(source, target) {
 		if (activeNode == target) {
 				console.log("yeet");
 				finish = true;
-				for (v in visited) {
-					visited[v].drawArrow('red');
-					visited[v].draw()
-				}
+				
 				source.changePrevious([]);//fixes 'phantom path' glitch where source gets previous
+				badPath(visited);
 				target.finalPath(target);
 				list = [];
 			}
