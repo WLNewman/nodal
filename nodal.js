@@ -21,6 +21,9 @@ let mouseX = 0;
 let mouseY = 0;
 let path = false;
 
+let coloringList = ['white', 'blue', 'red', 'green', 'yellow', 'purple', 'brown', 'pink'];
+let partitionNum = 0;
+
 
 class Node {
 	constructor(x, y, color, sisters) {
@@ -35,12 +38,14 @@ class Node {
 		this.weight.push(1);
 		nodeList.push(this);
 		this.goal = 100000000000; //goal is distance + hueristic in A*
+		this.colorIndex = 0;
+		this.partitionStatus = false; //has it been colored
 	}
 
 	// following draws when created
 	draw() {
 		con.beginPath();
-   		con.arc(this.x, this.y, 5, 0, Math.PI * 2, true);
+   		con.arc(this.x, this.y, 7, 0, Math.PI * 2, true);
 		con.fillStyle = this.color;
 		con.fill();
 		con.closePath();
@@ -122,6 +127,12 @@ class Node {
 	}
 	changePrevious(n) {
 		this.previous = n;
+	}
+	changePartition(status){
+		this.partitionStatus = status;
+	}
+	findPartitionStatus(){
+		return this.partitionStatus;
 	}
 	changeColor(c) {
 		this.color = c;
@@ -210,7 +221,7 @@ function erase() {
 
 function createNode() {
 	if (first == 0) {
-		first = new Node((0.5 * window.innerWidth), (0.5 * window.innerHeight), 'orange', []);
+		first = new Node((0.5 * window.innerWidth), (0.5 * window.innerHeight), 'white', []);
 		let p = document.getElementById('prompt');
 		p.style.display = 'none';
 	}
@@ -248,9 +259,9 @@ function changeNode() {
 			// hitbox
 			diff = pythagoras(mouseX, mouseY, nodeList[n].x, nodeList[n].y);
 			if (diff <= 8){
-				first.changeColor('white');
+				// first.changeColor('white');///////////////////////////////////////////////
 				first = nodeList[n];
-				first.changeColor('orange');
+				// first.changeColor('orange');//////////////////////////////////////////////
 				updateDraw(nodeList, 'Aquamarine');
 			}
 		}
@@ -282,10 +293,22 @@ function updateDraw(list, c) {
 	// when graph changes call this to update
 	con.fillStyle = 'black';
 	con.fillRect(0, 0, window.innerWidth, window.innerHeight);
-	drawEdges(c);
+	totalDeg = 0
 	for (n in list) {
 		list[n].draw()
+		totalDeg += list[n].sisters.length;
+
+		if (list[n] == first) {
+			let message = 'deg(' + first.sisters.length +')';
+			con.fillText(message, first.x, (first.y + 15));
+		}
 	}
+
+	totalDeg /= 2;
+	let vertsAndEdges = 'n = ' + nodeList.length + '   m = ' + totalDeg;
+	con.fillStyle = 'Aquamarine'
+	con.fillText(vertsAndEdges, 15, 100);
+	drawEdges(c);
 }
 
 function drawEdges(c) {
@@ -345,6 +368,7 @@ function makeGrid(){
 	}
 
 	if (random == true) {
+		//fate generates is a node/edge are deleted
 		for (n in nodeList) {
 			let fate = (Math.floor(Math.random() * 3) % 2);
 			console.log(fate);
@@ -408,11 +432,27 @@ function keyPress() {
 						nodeList[n].deleteSelf();
 						nodeList.splice(n, 1);
 						first = nodeList[0];
-						first.changeColor('orange');
 					}
 				}	
 			}
 			updateDraw(nodeList, 'Aquamarine');		
+			break;
+
+
+		//changes the color of the current node
+		case 'c':
+			if (first.colorIndex == (coloringList.length - 1)){
+				first.colorIndex = 0;
+			}else{
+				first.colorIndex++;
+			}
+			console.log('color change');
+			first.changeColor(coloringList[first.colorIndex]);
+			updateDraw(nodeList, 'Aquamarine');
+			break;
+
+		case 'p':
+			partition();
 			break;
 
 		//decrease weight
@@ -616,5 +656,52 @@ function aStar(source, target) {
 		visited[n].changeDistance(99999999999);
 		visited[n].changePrevious([]);
 		visited[n].goal = 100000000000;
+	}
+}
+
+function partition(){
+	//This creates a partition of the graph and colors the nodes accordingly
+
+	first.changeColor("white");
+
+	let colored = [];
+	let uncolored = [];
+
+	uncolored.push(first);
+
+
+	while (uncolored.length > 0){
+
+		let currentNode = uncolored.pop();
+		currentNode.partitionStatus = true;
+		let possibleColors = ['white', 'blue', 'red', 'green', 'yellow', 'purple', 'brown', 'pink', 'orange', 'gray'];
+
+
+		for (sis in currentNode.sisters){
+
+			if (currentNode.sisters[sis].partitionStatus === false){  //if we haven't colored this sister yet ignore it
+				uncolored.push(currentNode.sisters[sis]);
+			}
+			else{
+				possibleColors[possibleColors.indexOf(currentNode.sisters[sis].color)] = undefined;
+			}
+		}
+
+		for (let ind = 0; ind < possibleColors.length; ind++){
+			if (possibleColors[ind] != undefined){
+				currentNode.color = possibleColors[ind];
+				console.log(possibleColors[ind]);
+				ind = possibleColors.length;
+			}
+		}
+
+		console.log(`finsihed: ${uncolored}`);
+	}
+
+	updateDraw(nodeList, 'Aquamarine');
+
+	for (n in nodeList){
+		//resetting it in case the user needs it again
+		nodeList[n].partitionStatus = false;
 	}
 }
