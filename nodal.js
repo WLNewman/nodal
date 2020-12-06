@@ -20,6 +20,7 @@ let stop = false;
 let mouseX = 0;
 let mouseY = 0;
 let path = false;
+let graphDegree = 0
 
 let coloringList = ['white', 'blue', 'red', 'green', 'yellow', 'purple', 'brown', 'pink'];
 let partitionNum = 0;
@@ -305,6 +306,7 @@ function updateDraw(list, c) {
 	}
 
 	totalDeg /= 2;
+	graphDegree = totalDeg;
 	let vertsAndEdges = 'n = ' + nodeList.length + '   m = ' + totalDeg;
 	con.fillStyle = 'Aquamarine'
 	con.fillText(vertsAndEdges, 15, 100);
@@ -438,6 +440,20 @@ function keyPress() {
 			updateDraw(nodeList, 'Aquamarine');		
 			break;
 
+		case 'd':
+			if (nodeList.length > 1) { //prevents glitch on empty list
+				first = first;
+				for (n in first.sisters){
+					diff = pythagoras(mouseX, mouseY, first.sisters[n].x, first.sisters[n].y);
+
+					if (diff < 20) {
+						first.sisters[n].removeSister(first);
+						console.log('yes');
+					}
+				}	
+			}
+			updateDraw(nodeList, 'Aquamarine');		
+			break;
 
 		//changes the color of the current node
 		case 'c':
@@ -694,14 +710,8 @@ function partition(){
 				ind = possibleColors.length;
 			}
 		}
-
-		console.log(`finsihed: ${uncolored}`);
 	}
 
 	updateDraw(nodeList, 'Aquamarine');
-
-	for (n in nodeList){
-		//resetting it in case the user needs it again
-		nodeList[n].partitionStatus = false;
-	}
 }
+
